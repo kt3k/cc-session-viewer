@@ -1,0 +1,19 @@
+{
+  "name": "@kt3k/cc-session-viewer",
+  "version": "0.1.0",
+  "exports": "./src/cli.ts",
+  "tasks": {
+    "start": "deno run --allow-read --allow-net=127.0.0.1 --allow-env=HOME --allow-run=open,xdg-open,start src/cli.ts",
+    "dev": "deno run --watch --allow-read --allow-net=127.0.0.1 --allow-env=HOME --allow-run=open,xdg-open,start src/cli.ts --no-open",
+    "test": "deno test --allow-read"
+  },
+  "imports": {
+    "@std/http": "jsr:@std/http@^1",
+    "@std/path": "jsr:@std/path@^1",
+    "@std/fs": "jsr:@std/fs@^1",
+    "@std/cli": "jsr:@std/cli@^1"
+  },
+  "compilerOptions": {
+    "lib": ["deno.ns", "deno.window", "dom", "dom.iterable"]
+  }
+}
