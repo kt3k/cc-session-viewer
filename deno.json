@@ -1,0 +1,10 @@
+{
+  "tasks": {
+    "start": "deno run --allow-read --allow-net=127.0.0.1 --allow-env=HOME --allow-run=open,xdg-open,start src/cli.ts",
+    "dev": "deno run --watch --allow-read --allow-net=127.0.0.1 --allow-env=HOME --allow-run=open,xdg-open,start src/cli.ts --no-open",
+    "test": "deno test --allow-read"
+  },
+  "compilerOptions": {
+    "lib": ["deno.ns", "deno.window", "dom", "dom.iterable"]
+  }
+}
