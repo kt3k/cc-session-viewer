@@ -1,8 +1,8 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
 import { Buffer } from "node:buffer";
-import type { SessionDetail, SessionEvent, SessionMeta } from "./types.ts";
-import { parseJsonlLine, normalizeEvent } from "./session_parser.ts";
+import type { SessionDetail, SessionMeta } from "./types.ts";
+import { parseJsonlLine, normalizeEvent, parseSessionData, extractTextFromEvent } from "./session_parser.ts";
 
 /**
  * Load a session file fully: parse all lines, extract metadata and events.
@@ -12,60 +12,21 @@ export function loadSession(filePath: string): SessionDetail {
   const stat = fs.statSync(filePath);
   const sessionId = path.basename(filePath, ".jsonl");
 
-  const events: SessionEvent[] = [];
-  let cwd: string | undefined;
-  let gitBranch: string | undefined;
-  let version: string | undefined;
-  let projectPath = "";
-  let firstTimestamp: string | undefined;
-  let lastTimestamp: string | undefined;
-  let firstUserMessage: string | undefined;
-  let messageCount = 0;
-
-  for (const line of content.split("\n")) {
-    const raw = parseJsonlLine(line);
-    if (!raw) continue;
-
-    // Extract metadata from any line that has it
-    if (raw.cwd && !cwd) cwd = raw.cwd;
-    if (raw.gitBranch && !gitBranch) gitBranch = raw.gitBranch;
-    if (raw.version && !version) version = raw.version;
-
-    const event = normalizeEvent(raw);
-    if (!event) continue;
-
-    events.push(event);
-
-    // Track timestamps
-    if (event.timestamp) {
-      if (!firstTimestamp) firstTimestamp = event.timestamp;
-      lastTimestamp = event.timestamp;
-    }
-
-    // Count user and assistant messages
-    if (event.type === "user" || event.type === "assistant") {
-      messageCount++;
-    }
-
-    // Extract first user message text
-    if (event.type === "user" && !firstUserMessage) {
-      firstUserMessage = extractTextFromEvent(event);
-    }
-  }
+  const data = parseSessionData(content);
 
   const meta: SessionMeta = {
     sessionId,
-    projectPath,
-    cwd,
-    gitBranch,
-    firstTimestamp,
-    lastTimestamp,
-    messageCount,
-    firstUserMessage,
+    projectPath: "",
+    cwd: data.cwd,
+    gitBranch: data.gitBranch,
+    firstTimestamp: data.firstTimestamp,
+    lastTimestamp: data.lastTimestamp,
+    messageCount: data.messageCount,
+    firstUserMessage: data.firstUserMessage,
     sizeBytes: stat.size,
   };
 
-  return { sessionId, meta, events };
+  return { sessionId, meta, events: data.events };
 }
 
 /**
@@ -156,21 +117,4 @@ export function loadSessionMeta(
   } finally {
     fs.closeSync(fd);
   }
-}
-
-/**
- * Extract plain text from a session event's content.
- */
-function extractTextFromEvent(event: SessionEvent): string | undefined {
-  if (typeof event.content === "string") {
-    return event.content.slice(0, 200);
-  }
-  if (Array.isArray(event.content)) {
-    for (const block of event.content) {
-      if (block.type === "text") {
-        return block.text.slice(0, 200);
-      }
-    }
-  }
-  return undefined;
 }

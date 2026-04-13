@@ -81,23 +81,84 @@ function normalizePermissionModeEvent(raw: RawJsonlLine): SessionEvent {
   return buildBaseEvent(raw, "permission-mode", raw.permissionMode ?? "");
 }
 
+/** Metadata fields extracted during parsing. */
+export interface ParsedSessionData {
+  events: SessionEvent[];
+  cwd?: string;
+  gitBranch?: string;
+  version?: string;
+  firstTimestamp?: string;
+  lastTimestamp?: string;
+  messageCount: number;
+  firstUserMessage?: string;
+}
+
 /**
- * Parse all lines from a JSONL string into normalized events.
+ * Parse all lines from a JSONL string, returning normalized events
+ * and extracted metadata in a single pass.
  * Corrupted lines are silently skipped.
  */
-export function parseSessionEvents(jsonlContent: string): SessionEvent[] {
+export function parseSessionData(jsonlContent: string): ParsedSessionData {
   const lines = jsonlContent.split("\n");
   const events: SessionEvent[] = [];
+  let cwd: string | undefined;
+  let gitBranch: string | undefined;
+  let version: string | undefined;
+  let firstTimestamp: string | undefined;
+  let lastTimestamp: string | undefined;
+  let firstUserMessage: string | undefined;
+  let messageCount = 0;
 
   for (const line of lines) {
     const raw = parseJsonlLine(line);
     if (!raw) continue;
 
+    if (raw.cwd && !cwd) cwd = raw.cwd;
+    if (raw.gitBranch && !gitBranch) gitBranch = raw.gitBranch;
+    if (raw.version && !version) version = raw.version;
+
     const event = normalizeEvent(raw);
-    if (event) {
-      events.push(event);
+    if (!event) continue;
+
+    events.push(event);
+
+    if (event.timestamp) {
+      if (!firstTimestamp) firstTimestamp = event.timestamp;
+      lastTimestamp = event.timestamp;
+    }
+    if (event.type === "user" || event.type === "assistant") {
+      messageCount++;
+    }
+    if (event.type === "user" && !firstUserMessage) {
+      firstUserMessage = extractTextFromEvent(event);
     }
   }
 
-  return events;
+  return {
+    events,
+    cwd,
+    gitBranch,
+    version,
+    firstTimestamp,
+    lastTimestamp,
+    messageCount,
+    firstUserMessage,
+  };
+}
+
+/**
+ * Extract plain text from a session event's content (truncated to 200 chars).
+ */
+export function extractTextFromEvent(event: SessionEvent): string | undefined {
+  if (typeof event.content === "string") {
+    return event.content.slice(0, 200);
+  }
+  if (Array.isArray(event.content)) {
+    for (const block of event.content) {
+      if (block.type === "text") {
+        return block.text.slice(0, 200);
+      }
+    }
+  }
+  return undefined;
 }
