@@ -37,7 +37,6 @@ export function scanProjects(projectsDir: string): ProjectInfo[] {
       encodedPath: entry.name,
       projectPath: decodeProjectPath(entry.name),
       sessionFiles,
-      sessionCount: sessionFiles.length,
     });
   }
 

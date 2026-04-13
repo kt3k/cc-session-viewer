@@ -32,81 +32,53 @@ export function normalizeEvent(raw: RawJsonlLine): SessionEvent | null {
   }
 }
 
-function normalizeUserEvent(raw: RawJsonlLine): SessionEvent {
-  const messageContent = raw.message?.content;
-  let content: ContentBlock[] | string;
-
-  if (typeof messageContent === "string") {
-    content = [{ type: "text", text: messageContent }];
-  } else if (Array.isArray(messageContent)) {
-    // Could be tool_result blocks or text blocks
-    content = messageContent as ContentBlock[];
-  } else {
-    content = [];
-  }
-
-  // Check if this is actually a tool_result message
-  const isToolResult =
-    Array.isArray(content) &&
-    content.length > 0 &&
-    content.every((b) => "type" in b && b.type === "tool_result");
-
+function buildBaseEvent(
+  raw: RawJsonlLine,
+  type: SessionEvent["type"],
+  content: ContentBlock[] | string,
+): SessionEvent {
   return {
     uuid: raw.uuid ?? "",
     parentUuid: raw.parentUuid ?? undefined,
-    type: isToolResult ? "tool_result" : "user",
+    type,
     timestamp: raw.timestamp,
     isSidechain: raw.isSidechain ?? false,
     content,
     rawType: raw.type,
   };
+}
+
+function normalizeMessageContent(raw: RawJsonlLine): ContentBlock[] {
+  const messageContent = raw.message?.content;
+  if (Array.isArray(messageContent)) {
+    return messageContent as ContentBlock[];
+  }
+  if (typeof messageContent === "string") {
+    return [{ type: "text", text: messageContent }];
+  }
+  return [];
+}
+
+function normalizeUserEvent(raw: RawJsonlLine): SessionEvent {
+  const content = normalizeMessageContent(raw);
+
+  const isToolResult =
+    content.length > 0 &&
+    content.every((b) => b.type === "tool_result");
+
+  return buildBaseEvent(raw, isToolResult ? "tool_result" : "user", content);
 }
 
 function normalizeAssistantEvent(raw: RawJsonlLine): SessionEvent {
-  const messageContent = raw.message?.content;
-  let content: ContentBlock[];
-
-  if (Array.isArray(messageContent)) {
-    content = messageContent as ContentBlock[];
-  } else if (typeof messageContent === "string") {
-    content = [{ type: "text", text: messageContent }];
-  } else {
-    content = [];
-  }
-
-  return {
-    uuid: raw.uuid ?? "",
-    parentUuid: raw.parentUuid ?? undefined,
-    type: "assistant",
-    timestamp: raw.timestamp,
-    isSidechain: raw.isSidechain ?? false,
-    content,
-    rawType: raw.type,
-  };
+  return buildBaseEvent(raw, "assistant", normalizeMessageContent(raw));
 }
 
 function normalizeSummaryEvent(raw: RawJsonlLine): SessionEvent {
-  return {
-    uuid: raw.uuid ?? "",
-    parentUuid: raw.parentUuid ?? undefined,
-    type: "summary",
-    timestamp: raw.timestamp,
-    isSidechain: raw.isSidechain ?? false,
-    content: raw.summary ?? raw.message?.content ?? "",
-    rawType: raw.type,
-  };
+  return buildBaseEvent(raw, "summary", raw.summary ?? raw.message?.content ?? "");
 }
 
 function normalizePermissionModeEvent(raw: RawJsonlLine): SessionEvent {
-  return {
-    uuid: raw.uuid ?? "",
-    parentUuid: raw.parentUuid ?? undefined,
-    type: "permission-mode",
-    timestamp: raw.timestamp,
-    isSidechain: raw.isSidechain ?? false,
-    content: raw.permissionMode ?? "",
-    rawType: raw.type,
-  };
+  return buildBaseEvent(raw, "permission-mode", raw.permissionMode ?? "");
 }
 
 /**

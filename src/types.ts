@@ -6,8 +6,6 @@ export interface ProjectInfo {
   projectPath: string;
   /** Absolute paths to session JSONL files in this project */
   sessionFiles: string[];
-  /** Number of sessions */
-  sessionCount: number;
 }
 
 /** Metadata extracted from a session without full parsing. */
