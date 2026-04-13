@@ -1,0 +1,5 @@
+{"type":"user","parentUuid":null,"isSidechain":false,"message":{"role":"user","content":"What is this project?"},"uuid":"u1","timestamp":"2026-04-12T14:00:00.000Z","sessionId":"session-corrupted","cwd":"/Users/test/project-beta","version":"2.1.76","gitBranch":"main"}
+THIS IS A CORRUPTED LINE THAT IS NOT VALID JSON
+{"type":"assistant","parentUuid":"u1","isSidechain":false,"message":{"role":"assistant","content":[{"type":"text","text":"This is project beta."}]},"uuid":"a1","timestamp":"2026-04-12T14:00:05.000Z","sessionId":"session-corrupted","cwd":"/Users/test/project-beta","version":"2.1.76","gitBranch":"main"}
+{"truncated":true
+{"type":"user","parentUuid":"a1","isSidechain":false,"message":{"role":"user","content":"OK thanks"},"uuid":"u2","timestamp":"2026-04-12T14:00:10.000Z","sessionId":"session-corrupted","cwd":"/Users/test/project-beta","version":"2.1.76","gitBranch":"main"}

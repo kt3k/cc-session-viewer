@@ -10,6 +10,7 @@
     "open": "^10"
   },
   "devDependencies": {
+    "@types/node": "^22",
     "deno-test": "^1"
   }
 }
