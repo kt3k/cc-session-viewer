@@ -7,5 +7,11 @@ Built with Deno. Reads `~/.claude/projects` session files (read-only) and serves
 ## Usage
 
 ```
-deno run -A jsr:@kt3k/cc-session-viewer
+npx @kt3k/cc-session-viewer
+```
+
+or
+
+```
+dx @kt3k/cc-session-viewer
 ```
