@@ -62,8 +62,7 @@ function normalizeMessageContent(raw: RawJsonlLine): ContentBlock[] {
 function normalizeUserEvent(raw: RawJsonlLine): SessionEvent {
   const content = normalizeMessageContent(raw);
 
-  const isToolResult =
-    content.length > 0 &&
+  const isToolResult = content.length > 0 &&
     content.every((b) => b.type === "tool_result");
 
   return buildBaseEvent(raw, isToolResult ? "tool_result" : "user", content);
@@ -74,7 +73,11 @@ function normalizeAssistantEvent(raw: RawJsonlLine): SessionEvent {
 }
 
 function normalizeSummaryEvent(raw: RawJsonlLine): SessionEvent {
-  return buildBaseEvent(raw, "summary", raw.summary ?? raw.message?.content ?? "");
+  return buildBaseEvent(
+    raw,
+    "summary",
+    raw.summary ?? raw.message?.content ?? "",
+  );
 }
 
 function normalizePermissionModeEvent(raw: RawJsonlLine): SessionEvent {

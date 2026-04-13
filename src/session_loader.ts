@@ -2,7 +2,12 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 import { Buffer } from "node:buffer";
 import type { SessionDetail, SessionMeta } from "./types.ts";
-import { parseJsonlLine, normalizeEvent, parseSessionData, extractTextFromEvent } from "./session_parser.ts";
+import {
+  extractTextFromEvent,
+  normalizeEvent,
+  parseJsonlLine,
+  parseSessionData,
+} from "./session_parser.ts";
 
 /**
  * Load a session file fully: parse all lines, extract metadata and events.
