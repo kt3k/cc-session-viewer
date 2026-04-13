@@ -1,6 +1,6 @@
-import { assertEquals } from "jsr:@std/assert";
+import { assertEquals } from "@std/assert";
 import * as path from "node:path";
-import { scanProjects, decodeProjectPath } from "../src/scanner.ts";
+import { decodeProjectPath, scanProjects } from "../src/scanner.ts";
 
 const fixturesDir = path.resolve(
   path.dirname(new URL(import.meta.url).pathname),

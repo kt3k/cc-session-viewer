@@ -1,4 +1,7 @@
 {
+  "imports": {
+    "@std/assert": "jsr:@std/assert@^1"
+  },
   "tasks": {
     "start": "deno run --allow-read --allow-net=127.0.0.1 --allow-env=HOME --allow-run=open,xdg-open,start src/cli.ts",
     "dev": "deno run --watch --allow-read --allow-net=127.0.0.1 --allow-env=HOME --allow-run=open,xdg-open,start src/cli.ts --no-open",
