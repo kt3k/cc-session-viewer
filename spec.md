@@ -4,8 +4,8 @@
 
 `cc-session-viewer` は、Claude Code が記録するセッションログをブラウザ上で可視化する CLI ツールである。CLI を実行するとローカルに HTTP サーバーが起動し、ブラウザからセッション一覧と各セッションの詳細を閲覧できる。
 
-- **実装ランタイム**: Deno
-- **配布形態**: `deno install` でインストール可能な CLI / `deno run` で直接実行可能
+- **実装ランタイム**: Deno（開発・テスト）、Node 互換コードで記述
+- **配布形態**: npm publish（`npx @kt3k/cc-session-viewer` / `dx @kt3k/cc-session-viewer`）
 - **ターゲット**: ローカルで Claude Code を利用している開発者（自分のセッションを振り返る用途）
 
 ## ゴール / 非ゴール
@@ -13,7 +13,7 @@
 ### ゴール
 - ローカルに保存されている Claude Code セッションを一覧表示できる
 - 各セッションの会話履歴・ツール呼び出し・ツール結果を読みやすく表示する
-- 依存が少なく、`deno run` 一発で起動できる
+- 依存が少なく、`npx` 一発で起動できる
 - 既存のセッションファイル（`.jsonl`）を読み取り専用で扱い、破壊しない
 
 ### 非ゴール（v1 では対象外）
@@ -84,7 +84,7 @@ $ cc-session-viewer [options]
 ### 実行例
 
 ```
-$ deno run -A jsr:@kt3k/cc-session-viewer
+$ npx @kt3k/cc-session-viewer
 cc-session-viewer v0.1.0
 Scanning ~/.claude/projects ... 12 projects, 238 sessions
 Listening on http://127.0.0.1:7777
@@ -201,7 +201,7 @@ Listening on http://127.0.0.1:7777
 ```
 src/
   cli.ts              # エントリポイント。引数パース & サーバー起動
-  server.ts           # HTTP サーバー（Deno.serve ベース）
+  server.ts           # HTTP サーバー（node:http ベース）
   router.ts           # ルーティング & ハンドラ
   scanner.ts          # ~/.claude/projects のスキャン
   session_loader.ts   # JSONL 読み込み & イベント正規化
@@ -211,39 +211,39 @@ src/
     index.html
     app.js
     style.css
-  web/                # フロントエンドのソース（ビルドあり/なし）
 test/
   session_parser_test.ts
   scanner_test.ts
 fixtures/             # テスト用 jsonl
-deno.json             # タスク定義、import map、権限設定
+deno.json             # Deno タスク定義（dev/test 用）
+package.json          # npm パッケージメタデータ・依存定義
 spec.md               # 本仕様書
 README.md
 ```
 
 ### 依存
 
-- Deno 標準ライブラリのみを基本とする（`@std/http`, `@std/path`, `@std/fs`, `@std/cli/parse-args`）
+- Node 互換の built-in モジュール中心（`node:http`, `node:fs`, `node:path`, `node:url`, `node:util`）
+- `open`: ブラウザ自動起動用 npm パッケージ
+- `deno-test`: テスト用（devDependencies）— Node 上で `Deno.test` を実行可能にする
 - Markdown レンダラはフロントエンド側で軽量ライブラリ（例: `marked`）をバンドル
 - シンタックスハイライトは必要に応じて `highlight.js` の軽量ビルドをバンドル
 
-### 権限（Deno flags）
+### 開発時の権限（Deno flags）
 
-起動時に必要な権限は最小限に:
+`deno.json` の `tasks` に開発用の実行コマンドを定義。Deno で実行する場合は以下の権限が必要:
 
-- `--allow-read=$HOME/.claude/projects,<script-dir>/assets` : セッションファイル & 静的アセット
+- `--allow-read` : セッションファイル & 静的アセット
 - `--allow-net=127.0.0.1` : HTTP サーバー
 - `--allow-env=HOME` : ホームディレクトリ解決
-- `--allow-run=open` : ブラウザ自動起動（`--no-open` 時は不要）
-
-`deno.json` の `tasks` に `start` として上記 flags 付きの実行コマンドを定義する。
+- `--allow-run=open,xdg-open,start` : ブラウザ自動起動
 
 ### パフォーマンス方針
 
 - セッション一覧はメタ情報のみを先読みし、`.jsonl` 全体をパースしない（ファイル先頭と末尾数行だけ読む最適化を検討）
 - 詳細画面アクセス時に該当セッションをストリーミングでパースしてレスポンス
 - メモリキャッシュは LRU で数セッション分のみ保持
-- ファイル監視は v1 ではスコープ外（必要になれば `Deno.watchFs` で追加）
+- ファイル監視は v1 ではスコープ外（必要になれば `fs.watch` で追加）
 
 ## エラーハンドリング
 
@@ -253,8 +253,9 @@ README.md
 
 ## テスト
 
-- `scanner` / `session_parser` は fixtures の `.jsonl` を使ってユニットテスト
-- HTTP ハンドラは `Deno.serve` のハンドラ関数を直接呼び出して検証
+- `scanner` / `session_parser` は fixtures の `.jsonl` を使ってユニットテスト（`Deno.test` 使用）
+- HTTP ハンドラは直接呼び出して検証
+- テストは `deno test` で実行。`deno-test` パッケージにより Node 上でも `Deno.test` を実行可能
 - UI はスクリーンショットテストまでは行わず、API 経由での確認に留める（v1）
 
 ## 将来の拡張候補
@@ -263,4 +264,4 @@ README.md
 - セッション同士の diff / 統計ビュー（ツール使用回数、トークン量、経過時間）
 - お気に入り / タグ付け
 - エクスポート（Markdown / HTML）
-- `deno compile` による単一バイナリ配布
+- 単一バイナリ配布
