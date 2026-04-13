@@ -1,4 +1,4 @@
-import { assertEquals } from "jsr:@std/assert";
+import { assertEquals } from "@std/assert";
 import * as path from "node:path";
 import { loadSession, loadSessionMeta } from "../src/session_loader.ts";
 

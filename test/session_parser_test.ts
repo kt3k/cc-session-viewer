@@ -1,9 +1,9 @@
-import { assertEquals } from "jsr:@std/assert";
+import { assertEquals } from "@std/assert";
 import {
-  parseJsonlLine,
-  normalizeEvent,
-  parseSessionData,
   extractTextFromEvent,
+  normalizeEvent,
+  parseJsonlLine,
+  parseSessionData,
 } from "../src/session_parser.ts";
 
 Deno.test("parseJsonlLine parses valid JSON", () => {
@@ -43,7 +43,11 @@ Deno.test("normalizeEvent handles user with tool_result content", () => {
     message: {
       role: "user",
       content: [
-        { type: "tool_result" as const, tool_use_id: "t1", content: "result text" },
+        {
+          type: "tool_result" as const,
+          tool_use_id: "t1",
+          content: "result text",
+        },
       ],
     },
   };
@@ -61,7 +65,12 @@ Deno.test("normalizeEvent handles assistant with content blocks", () => {
       content: [
         { type: "thinking" as const, thinking: "hmm" },
         { type: "text" as const, text: "Here you go" },
-        { type: "tool_use" as const, id: "t1", name: "Read", input: { file_path: "x" } },
+        {
+          type: "tool_use" as const,
+          id: "t1",
+          name: "Read",
+          input: { file_path: "x" },
+        },
       ],
     },
   };

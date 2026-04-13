@@ -1,4 +1,4 @@
-import { assertEquals } from "jsr:@std/assert";
+import { assertEquals } from "@std/assert";
 import { LRUCache } from "../src/cache.ts";
 
 Deno.test("LRUCache basic get/set", () => {
