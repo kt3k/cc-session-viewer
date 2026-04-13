@@ -36,35 +36,35 @@
   - [x] 1.3 `types.ts` にセッション / イベント型を定義 [S]
   - [x] 1.4 `.gitignore` / README 雛形 [XS]
 -
-  2. [ ] セッションパーサ & スキャナ（コアロジック） [L]
-  - [ ] 2.1 テスト用 fixture JSONL を用意 [S]
-  - [ ] 2.2 `scanner.ts`: projects-dir を走査して project / session ファイル列挙
+  2. [x] セッションパーサ & スキャナ（コアロジック） [L]
+  - [x] 2.1 テスト用 fixture JSONL を用意 [S]
+  - [x] 2.2 `scanner.ts`: projects-dir を走査して project / session ファイル列挙
         [M]
-  - [ ] 2.3 `session_parser.ts`: 1 行 JSON →
+  - [x] 2.3 `session_parser.ts`: 1 行 JSON →
         正規化イベント変換（行タイプ分岐、破損行スキップ） [M]
-  - [ ] 2.4 `session_loader.ts`: ファイル全体を読み込み、メタ抽出 &
+  - [x] 2.4 `session_loader.ts`: ファイル全体を読み込み、メタ抽出 &
         イベント配列化 [M]
-  - [ ] 2.5 メタ専用の軽量ロード（先頭/末尾行のみ）最適化 [S]
-  - [ ] 2.6 LRU キャッシュ実装 [S]
-  - [ ] 2.7 ユニットテスト（scanner / parser / loader） [M]
+  - [x] 2.5 メタ専用の軽量ロード（先頭/末尾行のみ）最適化 [S]
+  - [x] 2.6 LRU キャッシュ実装 [S]
+  - [x] 2.7 ユニットテスト（scanner / parser / loader） [M]
 -
-  3. [ ] HTTP サーバー & API 層 [L]
-  - [ ] 3.1 `server.ts`: `Deno.serve` でサーバー起動、graceful shutdown [S]
-  - [ ] 3.2 `router.ts`: パス → ハンドラ分岐 [S]
-  - [ ] 3.3 `/api/projects` ハンドラ [XS]
-  - [ ] 3.4 `/api/sessions` ハンドラ（メタ一覧） [S]
-  - [ ] 3.5 `/api/sessions/:id` ハンドラ（正規化イベント） [S]
-  - [ ] 3.6 `/api/sessions/:id/raw` ハンドラ [XS]
-  - [ ] 3.7 `/assets/*` 静的配信 + SPA フォールバック（`/`, `/sessions/:id`）
+  3. [x] HTTP サーバー & API 層 [L]
+  - [x] 3.1 `server.ts`: `Deno.serve` でサーバー起動、graceful shutdown [S]
+  - [x] 3.2 `router.ts`: パス → ハンドラ分岐 [S]
+  - [x] 3.3 `/api/projects` ハンドラ [XS]
+  - [x] 3.4 `/api/sessions` ハンドラ（メタ一覧） [S]
+  - [x] 3.5 `/api/sessions/:id` ハンドラ（正規化イベント） [S]
+  - [x] 3.6 `/api/sessions/:id/raw` ハンドラ [XS]
+  - [x] 3.7 `/assets/*` 静的配信 + SPA フォールバック（`/`, `/sessions/:id`）
         [S]
-  - [ ] 3.8 CORS 拒否ヘッダ / 127.0.0.1 バインド検証 [XS]
-  - [ ] 3.9 API ハンドラのユニットテスト [M]
+  - [x] 3.8 CORS 拒否ヘッダ / 127.0.0.1 バインド検証 [XS]
+  - [x] 3.9 API ハンドラのユニットテスト [M]
 -
-  4. [ ] CLI エントリポイント [M]
-  - [ ] 4.1 `cli.ts`: `parseArgs` で flags 解析、`--help` / `--version` [S]
-  - [ ] 4.2 起動メッセージ（スキャン結果サマリ + URL） [XS]
-  - [ ] 4.3 `--no-open` 以外でブラウザ自動起動（`open`/`xdg-open`/`start`） [S]
-  - [ ] 4.4 ポート使用中 / projects-dir なしのエラーハンドリング [S]
+  4. [x] CLI エントリポイント [M]
+  - [x] 4.1 `cli.ts`: `parseArgs` で flags 解析、`--help` / `--version` [S]
+  - [x] 4.2 起動メッセージ（スキャン結果サマリ + URL） [XS]
+  - [x] 4.3 `--no-open` 以外でブラウザ自動起動（`open`/`xdg-open`/`start`） [S]
+  - [x] 4.4 ポート使用中 / projects-dir なしのエラーハンドリング [S]
 -
   5. [ ] フロントエンド UI [L]
   - [ ] 5.1 `index.html` + ベース `style.css`（ダーク/ライト） [S]
