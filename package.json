@@ -1,0 +1,15 @@
+{
+  "name": "@kt3k/cc-session-viewer",
+  "version": "0.1.0",
+  "description": "Browse and visualize Claude Code session logs in your browser",
+  "main": "./src/cli.ts",
+  "bin": {
+    "cc-session-viewer": "./src/cli.ts"
+  },
+  "dependencies": {
+    "open": "^10"
+  },
+  "devDependencies": {
+    "deno-test": "^1"
+  }
+}
