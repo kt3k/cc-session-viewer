@@ -2,57 +2,57 @@
 
 ## Context Map
 
-### Session Viewing（単一コンテキスト）
+### Session Viewing (Single Context)
 
-セッションデータの読み取り・パース・表示を担当する唯一のコンテキスト。
+The sole bounded context responsible for reading, parsing, and displaying session data.
 
-**含まれるモジュール:**
-- `src/scanner.ts` — プロジェクト・セッションファイルの発見
-- `src/session_parser.ts` — JSONL データのパース・正規化
-- `src/types.ts` — ドメイン型定義
+**Modules:**
+- `src/scanner.ts` — Discovery of projects and session files
+- `src/session_parser.ts` — Parsing and normalization of JSONL data
+- `src/types.ts` — Domain type definitions
 
-**外部依存:**
+**External Dependencies:**
 
-| 依存先 | 関係 | 統合パターン |
-|--------|------|-------------|
-| Claude Code セッションデータ (`~/.claude/projects/`) | Upstream（読み取り専用） | ファイルシステム直接読み取り。`RawJsonlLine` が境界型として機能 |
+| Dependency | Relationship | Integration Pattern |
+|------------|-------------|---------------------|
+| Claude Code session data (`~/.claude/projects/`) | Upstream (read-only) | Direct filesystem reads. `RawJsonlLine` serves as the boundary type |
 
 ## Glossary
 
-| 用語 | 定義 | コード上の表現 | 備考 |
-|------|------|---------------|------|
-| **Project** | Claude Code が操作対象としたプロジェクトディレクトリ | `ProjectInfo` (`types.ts`) | — |
-| **Session** | 1回の Claude Code 対話セッション。JSONL ファイル1つに対応 | `SessionMeta`, `SessionDetail` (`types.ts`) | — |
-| **Event** | セッション内の1つのやり取り | `SessionEvent` (`types.ts`) | 生データでは `message`（Anthropic API 由来） |
-| **ContentBlock** | メッセージ内の1つのコンテンツ単位 | `ContentBlock` union type (`types.ts`) | — |
-| **Sidechain** | メイン会話から分岐したサブエージェント処理 | `isSidechain` フラグ (`SessionEvent`) | 独立した型として未定義 |
-| **EncodedPath** | プロジェクトパスのエンコード形式（`/` → `-`） | `encodedPath`, `decodeProjectPath()` | 値オブジェクトとして未型付け |
+| Term | Definition | Code Representation | Notes |
+|------|-----------|---------------------|-------|
+| **Project** | A project directory that Claude Code has operated on | `ProjectInfo` (`types.ts`) | — |
+| **Session** | A single Claude Code conversation session. Corresponds to one JSONL file | `SessionMeta`, `SessionDetail` (`types.ts`) | — |
+| **Event** | A single interaction within a session | `SessionEvent` (`types.ts`) | Called `message` in raw data (from Anthropic API) |
+| **ContentBlock** | A single content unit within a message | `ContentBlock` union type (`types.ts`) | — |
+| **Sidechain** | A sub-agent execution branching from the main conversation | `isSidechain` flag (`SessionEvent`) | Not yet defined as a standalone type |
+| **EncodedPath** | Encoded form of a project path (`/` → `-`) | `encodedPath`, `decodeProjectPath()` | Not typed as a value object |
 
-### 既知の不整合
+### Known Inconsistencies
 
-- **Scanner** — インフラ用語。ドメイン的には `ProjectRepository` / `ProjectFinder` が適切
-- **Normalize** — 技術用語。`parseEvent` / `toSessionEvent` の方が意図が明確
-- **RawJsonlLine** — インフラ層の型がドメイン型と同じファイル (`types.ts`) に同居
+- **Scanner** — Infrastructure terminology. `ProjectRepository` / `ProjectFinder` would be more domain-appropriate
+- **Normalize** — Technical terminology. `parseEvent` / `toSessionEvent` would convey intent more clearly
+- **RawJsonlLine** — Infrastructure-layer type coexists with domain types in the same file (`types.ts`)
 
 ## Aggregates
 
 ### Project
 
-Claude Code が操作対象としたプロジェクトディレクトリ。セッションファイルの集合を保持する。
+A project directory that Claude Code has operated on. Holds a collection of session files.
 
-- **ルート**: `ProjectInfo` (`src/types.ts:2`)
-- **値オブジェクト**: `encodedPath`, `projectPath`
-- **関連**: `sessionFiles` (string[])
-- **不変条件**: `projectPath` は `encodedPath` から一意に導出可能。`sessionFiles` は `.jsonl` のみ。
-- **構築**: `scanProjects()` (`src/scanner.ts:20`)
+- **Root**: `ProjectInfo` (`src/types.ts:2`)
+- **Value Objects**: `encodedPath`, `projectPath`
+- **Associations**: `sessionFiles` (string[])
+- **Invariants**: `projectPath` is uniquely derivable from `encodedPath`. `sessionFiles` contains only `.jsonl` files.
+- **Construction**: `scanProjects()` (`src/scanner.ts:20`)
 
 ### Session
 
-1回の Claude Code 対話セッション。メタデータとイベント列から構成される。
+A single Claude Code conversation session. Composed of metadata and a sequence of events.
 
-- **ルート**: `SessionDetail` (`src/types.ts:76`)
-- **エンティティ**: `SessionMeta`, `SessionEvent`
-- **値オブジェクト**: `ContentBlock` (`TextBlock`, `ToolUseBlock`, `ToolResultBlock`, `ThinkingBlock`, `ImageBlock`)
-- **境界型**: `RawJsonlLine` (`src/types.ts:83`) — JSONL パース直後の生データ。`normalizeEvent()` で `SessionEvent` へ変換
-- **不変条件**: 各 Event は `uuid` を持つ。`type` は `"user" | "assistant" | "tool_result" | "summary" | "permission-mode"` のいずれか。
-- **パース**: `parseSessionEvents()`, `normalizeEvent()` (`src/session_parser.ts`)
+- **Root**: `SessionDetail` (`src/types.ts:76`)
+- **Entities**: `SessionMeta`, `SessionEvent`
+- **Value Objects**: `ContentBlock` (`TextBlock`, `ToolUseBlock`, `ToolResultBlock`, `ThinkingBlock`, `ImageBlock`)
+- **Boundary Type**: `RawJsonlLine` (`src/types.ts:83`) — Raw data immediately after JSONL parsing. Converted to `SessionEvent` via `normalizeEvent()`
+- **Invariants**: Each Event has a `uuid`. `type` is one of `"user" | "assistant" | "tool_result" | "summary" | "permission-mode"`.
+- **Parsing**: `parseSessionEvents()`, `normalizeEvent()` (`src/session_parser.ts`)
