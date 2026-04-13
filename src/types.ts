@@ -94,6 +94,8 @@ export interface RawJsonlLine {
     role?: string;
     content?: string | ContentBlock[];
   };
+  summary?: string;
+  permissionMode?: string;
   // deno-lint-ignore no-explicit-any
   [key: string]: any;
 }
