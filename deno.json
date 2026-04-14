@@ -7,12 +7,18 @@
     "dev": "deno run --watch --allow-read --allow-net=127.0.0.1 --allow-env=HOME --allow-run=open,xdg-open,start src/cli.ts --no-open",
     "test": "deno test --allow-read",
     "build:css": "deno run -A npm:@tailwindcss/cli -i src/styles/input.css -o src/assets/style.css --minify",
-    "watch:css": "deno run -A npm:@tailwindcss/cli -i src/styles/input.css -o src/assets/style.css --watch"
+    "watch:css": "deno run -A npm:@tailwindcss/cli -i src/styles/input.css -o src/assets/style.css --watch",
+    "build:js": "deno bundle --minify src/client/main.js -o src/assets/app.js",
+    "watch:js": "deno bundle --watch src/client/main.js -o src/assets/app.js",
+    "build": "deno task build:css && deno task build:js"
   },
   "compilerOptions": {
     "lib": ["deno.ns", "deno.window", "dom", "dom.iterable"]
   },
   "fmt": {
-    "exclude": ["src/assets/style.css"]
+    "exclude": ["src/assets/style.css", "src/assets/app.js"]
+  },
+  "lint": {
+    "exclude": ["src/assets/app.js"]
   }
 }
