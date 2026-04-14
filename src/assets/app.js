@@ -121,7 +121,7 @@ document.addEventListener("click", (e) => {
   navigate(href);
 });
 
-window.addEventListener("popstate", render);
+globalThis.addEventListener("popstate", render);
 
 // Initial render
 render();
