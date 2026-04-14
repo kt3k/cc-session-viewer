@@ -1,15 +1,18 @@
 // cc-session-viewer frontend
 // Minimal SPA: list screen at /, detail screen at /sessions/:id
 
-const app = document.getElementById("app");
+import type { ProjectInfo, SessionDetail, SessionMeta } from "../types.ts";
 
-async function fetchJSON(url) {
+const app = document.getElementById("app");
+if (!app) throw new Error("#app element not found");
+
+async function fetchJSON<T>(url: string): Promise<T> {
   const res = await fetch(url);
   if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
-  return res.json();
+  return res.json() as Promise<T>;
 }
 
-function escapeHtml(str) {
+function escapeHtml(str: unknown): string {
   return String(str ?? "")
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
@@ -18,12 +21,16 @@ function escapeHtml(str) {
     .replace(/'/g, "&#039;");
 }
 
-function renderLoading() {
-  app.innerHTML = `<div class="loading">Loading...</div>`;
+function errorMessage(err: unknown): string {
+  return err instanceof Error ? err.message : String(err);
 }
 
-function renderError(msg) {
-  app.innerHTML = `<div class="error">${escapeHtml(msg)}</div>`;
+function renderLoading() {
+  app!.innerHTML = `<div class="loading">Loading...</div>`;
+}
+
+function renderError(msg: string) {
+  app!.innerHTML = `<div class="error">${escapeHtml(msg)}</div>`;
 }
 
 // --- List screen (placeholder — to be filled in 5.3) ---
@@ -31,10 +38,10 @@ async function renderList() {
   renderLoading();
   try {
     const [projects, sessions] = await Promise.all([
-      fetchJSON("/api/projects"),
-      fetchJSON("/api/sessions"),
+      fetchJSON<ProjectInfo[]>("/api/projects"),
+      fetchJSON<SessionMeta[]>("/api/sessions"),
     ]);
-    app.innerHTML = `
+    app!.innerHTML = `
       <div class="list-layout">
         <aside class="sidebar">
           <h3>Projects (${projects.length})</h3>
@@ -48,19 +55,19 @@ async function renderList() {
       </div>
     `;
   } catch (err) {
-    renderError(`Failed to load: ${err.message}`);
+    renderError(`Failed to load: ${errorMessage(err)}`);
   }
 }
 
 // --- Detail screen (placeholder — to be filled in 5.4–5.8) ---
-async function renderDetail(sessionId) {
+async function renderDetail(sessionId: string) {
   renderLoading();
   try {
-    const detail = await fetchJSON(
+    const detail = await fetchJSON<SessionDetail>(
       `/api/sessions/${encodeURIComponent(sessionId)}`,
     );
-    const m = detail.meta ?? {};
-    app.innerHTML = `
+    const m = detail.meta ?? ({} as Partial<SessionMeta>);
+    app!.innerHTML = `
       <div class="detail-layout">
         <div class="detail-header">
           <h1>${escapeHtml(m.sessionId ?? sessionId)}</h1>
@@ -78,12 +85,17 @@ async function renderDetail(sessionId) {
       </div>
     `;
   } catch (err) {
-    renderError(`Failed to load session: ${err.message}`);
+    renderError(`Failed to load session: ${errorMessage(err)}`);
   }
 }
 
 // --- Router ---
-function matchRoute(pathname) {
+type Route =
+  | { name: "list" }
+  | { name: "detail"; sessionId: string }
+  | { name: "notfound" };
+
+function matchRoute(pathname: string): Route {
   if (pathname === "/" || pathname === "") {
     return { name: "list" };
   }
@@ -101,19 +113,20 @@ function render() {
   } else if (route.name === "detail") {
     renderDetail(route.sessionId);
   } else {
-    app.innerHTML = `<div class="error">404 Not Found</div>`;
+    app!.innerHTML = `<div class="error">404 Not Found</div>`;
   }
 }
 
-function navigate(href) {
+function navigate(href: string) {
   if (href === location.pathname) return;
   history.pushState({}, "", href);
   render();
 }
 
 // Intercept clicks on internal links with [data-link]
-document.addEventListener("click", (e) => {
-  const a = e.target.closest("a[data-link]");
+document.addEventListener("click", (e: MouseEvent) => {
+  const target = e.target as Element | null;
+  const a = target?.closest<HTMLAnchorElement>("a[data-link]");
   if (!a) return;
   const href = a.getAttribute("href");
   if (!href || href.startsWith("http")) return;

@@ -8,8 +8,8 @@
     "test": "deno test --allow-read",
     "build:css": "deno run -A npm:@tailwindcss/cli -i src/styles/input.css -o src/assets/style.css --minify",
     "watch:css": "deno run -A npm:@tailwindcss/cli -i src/styles/input.css -o src/assets/style.css --watch",
-    "build:js": "deno bundle --minify src/client/main.js -o src/assets/app.js",
-    "watch:js": "deno bundle --watch src/client/main.js -o src/assets/app.js",
+    "build:js": "deno bundle --minify src/client/main.ts -o src/assets/app.js",
+    "watch:js": "deno bundle --watch src/client/main.ts -o src/assets/app.js",
     "build": "deno task build:css && deno task build:js"
   },
   "compilerOptions": {
