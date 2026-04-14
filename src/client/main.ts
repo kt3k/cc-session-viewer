@@ -1,10 +1,8 @@
 // cc-session-viewer frontend
 // Minimal SPA: list screen at /, detail screen at /sessions/:id
 
+import { type Context, mount, register } from "@kt3k/cell";
 import type { ProjectInfo, SessionDetail, SessionMeta } from "../types.ts";
-
-const app = document.getElementById("app");
-if (!app) throw new Error("#app element not found");
 
 async function fetchJSON<T>(url: string): Promise<T> {
   const res = await fetch(url);
@@ -25,23 +23,14 @@ function errorMessage(err: unknown): string {
   return err instanceof Error ? err.message : String(err);
 }
 
-function renderLoading() {
-  app!.innerHTML = `<div class="loading">Loading...</div>`;
-}
-
-function renderError(msg: string) {
-  app!.innerHTML = `<div class="error">${escapeHtml(msg)}</div>`;
-}
-
-// --- List screen (placeholder — to be filled in 5.3) ---
-async function renderList() {
-  renderLoading();
+async function renderList(el: HTMLElement) {
+  el.innerHTML = `<div class="loading">Loading...</div>`;
   try {
     const [projects, sessions] = await Promise.all([
       fetchJSON<ProjectInfo[]>("/api/projects"),
       fetchJSON<SessionMeta[]>("/api/sessions"),
     ]);
-    app!.innerHTML = `
+    el.innerHTML = `
       <div class="list-layout">
         <aside class="sidebar">
           <h3>Projects (${projects.length})</h3>
@@ -55,19 +44,20 @@ async function renderList() {
       </div>
     `;
   } catch (err) {
-    renderError(`Failed to load: ${errorMessage(err)}`);
+    el.innerHTML = `<div class="error">Failed to load: ${
+      escapeHtml(errorMessage(err))
+    }</div>`;
   }
 }
 
-// --- Detail screen (placeholder — to be filled in 5.4–5.8) ---
-async function renderDetail(sessionId: string) {
-  renderLoading();
+async function renderDetail(el: HTMLElement, sessionId: string) {
+  el.innerHTML = `<div class="loading">Loading...</div>`;
   try {
     const detail = await fetchJSON<SessionDetail>(
       `/api/sessions/${encodeURIComponent(sessionId)}`,
     );
     const m = detail.meta ?? ({} as Partial<SessionMeta>);
-    app!.innerHTML = `
+    el.innerHTML = `
       <div class="detail-layout">
         <div class="detail-header">
           <h1>${escapeHtml(m.sessionId ?? sessionId)}</h1>
@@ -85,56 +75,47 @@ async function renderDetail(sessionId: string) {
       </div>
     `;
   } catch (err) {
-    renderError(`Failed to load session: ${errorMessage(err)}`);
+    el.innerHTML = `<div class="error">Failed to load session: ${
+      escapeHtml(errorMessage(err))
+    }</div>`;
   }
 }
 
-// --- Router ---
-type Route =
-  | { name: "list" }
-  | { name: "detail"; sessionId: string }
-  | { name: "notfound" };
-
-function matchRoute(pathname: string): Route {
+function render(el: HTMLElement) {
+  const pathname = location.pathname;
   if (pathname === "/" || pathname === "") {
-    return { name: "list" };
+    renderList(el);
+    return;
   }
   const m = pathname.match(/^\/sessions\/([^/]+)$/);
   if (m) {
-    return { name: "detail", sessionId: decodeURIComponent(m[1]) };
+    renderDetail(el, decodeURIComponent(m[1]));
+    return;
   }
-  return { name: "notfound" };
+  el.innerHTML = `<div class="error">404 Not Found</div>`;
 }
 
-function render() {
-  const route = matchRoute(location.pathname);
-  if (route.name === "list") {
-    renderList();
-  } else if (route.name === "detail") {
-    renderDetail(route.sessionId);
-  } else {
-    app!.innerHTML = `<div class="error">404 Not Found</div>`;
-  }
-}
-
-function navigate(href: string) {
+function navigate(el: HTMLElement, href: string) {
   if (href === location.pathname) return;
   history.pushState({}, "", href);
-  render();
+  render(el);
 }
 
-// Intercept clicks on internal links with [data-link]
-document.addEventListener("click", (e: MouseEvent) => {
-  const target = e.target as Element | null;
-  const a = target?.closest<HTMLAnchorElement>("a[data-link]");
-  if (!a) return;
-  const href = a.getAttribute("href");
-  if (!href || href.startsWith("http")) return;
-  e.preventDefault();
-  navigate(href);
-});
+function App({ el }: Context) {
+  document.addEventListener("click", (e) => {
+    const target = e.target as Element | null;
+    const a = target?.closest<HTMLAnchorElement>("a[data-link]");
+    if (!a) return;
+    const href = a.getAttribute("href");
+    if (!href || href.startsWith("http")) return;
+    e.preventDefault();
+    navigate(el, href);
+  });
 
-globalThis.addEventListener("popstate", render);
+  globalThis.addEventListener("popstate", () => render(el));
 
-// Initial render
-render();
+  render(el);
+}
+
+register(App, "app");
+mount();

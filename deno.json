@@ -1,5 +1,6 @@
 {
   "imports": {
+    "@kt3k/cell": "jsr:@kt3k/cell@^0.7.9",
     "@std/assert": "jsr:@std/assert@^1"
   },
   "tasks": {

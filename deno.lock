@@ -1,6 +1,9 @@
 {
   "version": "5",
   "specifiers": {
+    "jsr:@kt3k/cell@*": "0.7.9",
+    "jsr:@kt3k/cell@~0.7.9": "0.7.9",
+    "jsr:@kt3k/signal@0.4": "0.4.0",
     "jsr:@std/assert@*": "1.0.19",
     "jsr:@std/assert@1": "1.0.19",
     "jsr:@std/internal@^1.0.12": "1.0.12",
@@ -11,6 +14,15 @@
     "npm:tailwindcss@^4.2.2": "4.2.2"
   },
   "jsr": {
+    "@kt3k/cell@0.7.9": {
+      "integrity": "020ccdd1269cf9180d6fb7dab28944c19e1ce0850c7a50e34ff6b2993c65a8f2",
+      "dependencies": [
+        "jsr:@kt3k/signal"
+      ]
+    },
+    "@kt3k/signal@0.4.0": {
+      "integrity": "0490d1f6d61690d1d2f7b8265e4975ae7f377d88c7a4af41168a6eb3ddf3781f"
+    },
     "@std/assert@1.0.19": {
       "integrity": "eaada96ee120cb980bc47e040f82814d786fe8162ecc53c91d8df60b8755991e",
       "dependencies": [
@@ -443,6 +455,7 @@
   },
   "workspace": {
     "dependencies": [
+      "jsr:@kt3k/cell@~0.7.9",
       "jsr:@std/assert@1"
     ],
     "packageJson": {
