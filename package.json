@@ -10,7 +10,9 @@
     "open": "^10"
   },
   "devDependencies": {
+    "@tailwindcss/cli": "^4.2.2",
     "@types/node": "^22",
-    "deno-test": "^1"
+    "deno-test": "^1",
+    "tailwindcss": "^4.2.2"
   }
 }

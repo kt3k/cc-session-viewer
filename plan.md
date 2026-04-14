@@ -67,8 +67,8 @@
   - [x] 4.4 ポート使用中 / projects-dir なしのエラーハンドリング [S]
 -
   5. [ ] フロントエンド UI [L]
-  - [ ] 5.1 `index.html` + ベース `style.css`（ダーク/ライト） [S]
-  - [ ] 5.2 `app.js`: ルーター（`/`, `/sessions/:id`） [S]
+  - [x] 5.1 `index.html` + ベース `style.css`（ダーク/ライト） [S]
+  - [x] 5.2 `app.js`: ルーター（`/`, `/sessions/:id`） [S]
   - [ ] 5.3 一覧画面: サイドバー / カード / ソート / 検索ボックス [M]
   - [ ] 5.4 詳細画面: タイムラインレンダラ（user/assistant/thinking） [M]
   - [ ] 5.5 詳細画面: tool_use + tool_result 折りたたみ & ツール別カード [M]

@@ -15,6 +15,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: lts/*
+      - run: deno install
+      - run: deno task build:css
+      - name: Verify built CSS is up to date
+        run: git diff --exit-code src/assets/style.css
       - run: deno fmt --check
       - run: deno lint
       - run: deno check src/**/*.ts

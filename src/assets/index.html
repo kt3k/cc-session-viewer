@@ -7,7 +7,18 @@
     <link rel="stylesheet" href="/assets/style.css">
   </head>
   <body>
-    <div id="app"></div>
+    <header class="app-header">
+      <a href="/" class="app-title" data-link>cc-session-viewer</a>
+      <div class="app-header-actions">
+        <input
+          type="search"
+          id="search-input"
+          class="search-input"
+          placeholder="Search sessions... (press /)"
+        >
+      </div>
+    </header>
+    <main id="app"></main>
     <script type="module" src="/assets/app.js"></script>
   </body>
 </html>
