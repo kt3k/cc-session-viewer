@@ -15,6 +15,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: lts/*
+      - run: deno install
       - run: deno fmt --check
       - run: deno lint
       - run: deno check src/**/*.ts
